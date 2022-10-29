@@ -3,6 +3,7 @@ pragma windows_only
 
 foreign '__libs__/libuser32.a'
 foreign '__libs__/libgdi32.a'
+foreign '__libs__/libcomdlg32.a'
 
 // https://docs.microsoft.com/en-us/windows/win32/winprog/windows-data-types
 alias LRESULT = ptr
@@ -59,10 +60,6 @@ func MAKEINTRESOURCEA(i int) LPSTR = cast LPSTR (cast ULONG_PTR (cast WORD i))
 
 // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getsyscolor
 define COLOR_WINDOW = 5
-
-// https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-messagebox
-define MB_ICONEXCLAMATION = 0x00000030
-define MB_OK = 0x00000000
 
 // https://docs.microsoft.com/en-us/windows/win32/winmsg/extended-window-styles
 define WS_EX_CLIENTEDGE = 0x00000200
@@ -367,3 +364,63 @@ define ES_NUMBER = 0x2000
 
 // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowtexta
 foreign GetWindowTextA(hWnd HWND, lpString LPSTR, nMaxCount int) int
+
+// https://github.com/tpn/winsdk-10/blob/9b69fd26ac0c7d0b83d378dba01080e93349c2ed/Include/10.0.14393.0/um/commdlg.h#L104
+alias LPOFNHOOKPROC = stdcall func(HWND, UINT, WPARAM, LPARAM) UINT_PTR
+
+// http://winapi.freetechsecrets.com/win32/WIN32OPENFILENAME.htm
+alias OPENFILENAME = OPENFILENAMEA
+struct OPENFILENAMEA (
+    lStructSize DWORD,
+    hwndOwner HWND,
+    hInstance HINSTANCE,
+    lpstrFilter LPCSTR,
+    lpstrCustomFilter LPSTR,
+    nMaxCustFilter DWORD,
+    nFilterIndex DWORD,
+    lpstrFile LPSTR,
+    nMaxFile DWORD,
+    lpstrFileTitle LPSTR,
+    nMaxFileTitle DWORD,
+    lpstrInitialDir LPCSTR,
+    lpstrTitle LPCSTR,
+    Flags DWORD,
+    nFileOffset WORD,
+    nFileExtension WORD,
+    lpstrDefExt LPCSTR,
+    lCustData LPARAM,
+    lpfnHook LPOFNHOOKPROC,
+    lpTemplateName LPCSTR,
+)
+
+// https://learn.microsoft.com/en-us/windows/win32/api/commdlg/nf-commdlg-getopenfilenamea
+foreign GetOpenFileNameA(params *OPENFILENAMEA) BOOL
+func alias GetOpenFileName => GetOpenFileNameA
+
+// https://github.com/tpn/winsdk-10/blob/9b69fd26ac0c7d0b83d378dba01080e93349c2ed/Include/10.0.14393.0/um/commdlg.h#L277-L308
+define OFN_READONLY = 0x00000001
+define OFN_OVERWRITEPROMPT = 0x00000002
+define OFN_HIDEREADONLY = 0x00000004
+define OFN_NOCHANGEDIR = 0x00000008
+define OFN_SHOWHELP = 0x00000010
+define OFN_ENABLEHOOK = 0x00000020
+define OFN_ENABLETEMPLATE = 0x00000040
+define OFN_ENABLETEMPLATEHANDLE = 0x00000080
+define OFN_NOVALIDATE = 0x00000100
+define OFN_ALLOWMULTISELECT = 0x00000200
+define OFN_EXTENSIONDIFFERENT = 0x00000400
+define OFN_PATHMUSTEXIST = 0x00000800
+define OFN_FILEMUSTEXIST = 0x00001000
+define OFN_CREATEPROMPT = 0x00002000
+define OFN_SHAREAWARE = 0x00004000
+define OFN_NOREADONLYRETURN = 0x00008000
+define OFN_NOTESTFILECREATE = 0x00010000
+define OFN_NONETWORKBUTTON = 0x00020000
+define OFN_NOLONGNAMES = 0x00040000 // force no long names for 4.x modules
+define OFN_EXPLORER = 0x00080000 // new look commdlg
+define OFN_NODEREFERENCELINKS = 0x00100000
+define OFN_LONGNAMES = 0x00200000 // force long names for 3.x modules
+define OFN_ENABLEINCLUDENOTIFY = 0x00400000 // send include message to callback
+define OFN_ENABLESIZING = 0x00800000
+define OFN_DONTADDTORECENT = 0x02000000
+define OFN_FORCESHOWHIDDEN = 0x10000000 // Show All files including System and hidden files
