@@ -1,0 +1,93 @@
+
+pragma compiler_version '2.7'
+pragma windows_only
+pragma windowed
+
+import basics
+import "../windows.adept"
+
+define IDC_EDIT1 = 101
+define IDC_BUTTON_SAY = 102
+
+// Step 4: the Window Procedure
+stdcall func WndProc(hwnd HWND, msg UINT, wParam WPARAM, lParam LPARAM) LRESULT {
+    switch msg {
+        case WM_CLOSE
+            DestroyWindow(hwnd)
+        case WM_DESTROY
+            PostQuitMessage(0)
+        case WM_COMMAND
+            switch LOWORD(wParam) {
+            case IDC_BUTTON_SAY
+                buffer 1024 ubyte = undef
+                edittext HWND = GetDlgItem(hwnd, IDC_EDIT1)
+                GetWindowTextA(edittext, buffer at 0, 1024)
+
+                MessageBoxA(hwnd, buffer at 0, 'Title', MB_OK | MB_ICONINFORMATION)
+            }
+    }
+
+    return DefWindowProc(hwnd, msg, wParam, lParam)
+}
+
+g_szClassName LPCSTR = 'myWindowClass'
+
+external stdcall func WinMain(hInstance, _hPrevInstance HINSTANCE, _lpCmdLine LPSTR, nCmdShow int) int {
+    wc WNDCLASSEX
+    hwnd HWND
+    Msg MSG
+
+    // Step 1: Registering the Window Class
+    wc.cbSize        = sizeof WNDCLASSEX
+    wc.style         = 0
+    wc.lpfnWndProc   = func &WndProc
+    wc.cbClsExtra    = 0
+    wc.cbWndExtra    = 0
+    wc.hInstance     = hInstance
+    wc.hIcon         = LoadIcon(NULL, IDI_APPLICATION)
+    wc.hCursor       = LoadCursor(NULL, IDC_ARROW)
+    wc.hbrBackground = cast HBRUSH (COLOR_WINDOW + 1)
+    wc.lpszMenuName  = NULL
+    wc.lpszClassName = g_szClassName
+    wc.hIconSm       = LoadIcon(NULL, IDI_APPLICATION)
+
+    if !RegisterClassEx(&wc) {
+        MessageBox(NULL, 'Window Registration Failed!', 'Error!', MB_ICONEXCLAMATION | MB_OK)
+        return 0
+    }
+
+    // Step 2: Creating the Window
+    hwnd = CreateWindowEx(
+        WS_EX_CLIENTEDGE,
+        g_szClassName,
+        'The title of my window',
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT, 640, 480,
+        NULL, NULL, hInstance, NULL)
+
+    if hwnd == NULL {
+        MessageBox(NULL, 'Window Creation Failed!', 'Error!', MB_ICONEXCLAMATION | MB_OK)
+        return 0
+    }
+
+    _hwndEdit1 HWND = CreateWindow(
+        'edit',
+        'Starting text goes here',
+        WS_BORDER | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL,
+        0, 0, 617, 363,
+        hwnd, IDC_EDIT1 as HMENU, hInstance, NULL
+    );
+
+    _hButton1 HWND = CreateWindowA('button', 'Say', WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 380, 100, 40, hwnd, IDC_BUTTON_SAY as HMENU, hInstance, null)
+
+    ShowWindow(hwnd, nCmdShow)
+    UpdateWindow(hwnd)
+
+    // Step 3: The Message Loop
+    while GetMessage(&Msg, NULL, 0, 0) > 0 {
+        TranslateMessage(&Msg)
+        DispatchMessage(&Msg)
+    }
+
+    return Msg.wParam
+}
