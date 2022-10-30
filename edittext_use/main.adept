@@ -9,15 +9,9 @@ import "../windows.adept"
 define IDC_EDIT1 = 101
 define IDC_BUTTON_SAY = 102
 
-g_hCursorIBeam HWND = null
-g_hCursorArrow HWND = null
-
 // Step 4: the Window Procedure
 stdcall func WndProc(hwnd HWND, msg UINT, wParam WPARAM, lParam LPARAM) LRESULT {
     switch msg {
-        case WM_CREATE
-            g_hCursorArrow = LoadCursor(null, IDC_ARROW)
-            g_hCursorIBeam = LoadCursor(null, IDC_IBEAM)
         case WM_CLOSE
             DestroyWindow(hwnd)
         case WM_DESTROY
@@ -35,16 +29,6 @@ stdcall func WndProc(hwnd HWND, msg UINT, wParam WPARAM, lParam LPARAM) LRESULT 
 
                 MessageBoxA(hwnd, buffer, 'Title', MB_OK | MB_ICONINFORMATION)
             }
-        case WM_SETCURSOR
-            // Use IBeam cursor for edit control
-            if wParam as HWND == GetDlgItem(hwnd, IDC_EDIT1) {
-                SetCursor(g_hCursorArrow)
-                SetCursor(g_hCursorIBeam)
-                return true as ptr
-            }
-
-            // Otherwise, use our default window cursor
-            return false as ptr
     }
 
     return DefWindowProc(hwnd, msg, wParam, lParam)

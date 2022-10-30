@@ -1,3 +1,4 @@
+
 @echo off
 
 echo ^[WARNING^] Assuming `adept` command supports version `2.7`
