@@ -38,13 +38,32 @@ alias HGLOBAL = HANDLE
 alias SIZE_T = usize // ULONG_PTR
 
 define NULL = null
+define WM_CREATE = 0x0001 // https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-create
 define WM_CLOSE = 0x0010 // https://docs.microsoft.com/en-us/windows/win32/winmsg/wm-close
 define WM_DESTROY = 0x0002 // https://docs.microsoft.com/en-us/windows/win32/winmsg/wm-destroy
 define WM_COMMAND = 0x0111 // https://learn.microsoft.com/en-us/windows/win32/menurc/wm-command
 define WM_CTLCOLORSTATIC = 0x0138 // https://github.com/tpn/winsdk-10/blob/9b69fd26ac0c7d0b83d378dba01080e93349c2ed/Include/10.0.10240.0/um/WinUser.h#L2218
+define WM_SETCURSOR = 0x0020 // https://learn.microsoft.com/en-us/windows/win32/menurc/wm-setcursor
 
 define IDI_APPLICATION = MAKEINTRESOURCEA(32512) // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-loadicona
-define IDC_ARROW = MAKEINTRESOURCEA(32512) // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-loadcursora
+
+// https://github.com/tpn/winsdk-10/blob/master/Include/10.0.10240.0/um/WinUser.h#L10236-L10255
+define IDC_ARROW = MAKEINTRESOURCEA(32512)
+define IDC_IBEAM = MAKEINTRESOURCEA(32513)
+define IDC_WAIT = MAKEINTRESOURCEA(32514)
+define IDC_CROSS = MAKEINTRESOURCEA(32515)
+define IDC_UPARROW = MAKEINTRESOURCEA(32516)
+define IDC_SIZE = MAKEINTRESOURCEA(32640) /* OBSOLETE: use IDC_SIZEALL */
+define IDC_ICON = MAKEINTRESOURCEA(32641) /* OBSOLETE: use IDC_ARROW */
+define IDC_SIZENWSE = MAKEINTRESOURCEA(32642)
+define IDC_SIZENESW = MAKEINTRESOURCEA(32643)
+define IDC_SIZEWE = MAKEINTRESOURCEA(32644)
+define IDC_SIZENS = MAKEINTRESOURCEA(32645)
+define IDC_SIZEALL = MAKEINTRESOURCEA(32646)
+define IDC_NO = MAKEINTRESOURCEA(32648) /* not in win3.1 */
+define IDC_HAND = MAKEINTRESOURCEA(32649)
+define IDC_APPSTARTING = MAKEINTRESOURCEA(32650) /* not in win3.1 */
+define IDC_HELP = MAKEINTRESOURCEA(32651)
 
 func LOWORD(dwValue DWORD) WORD = dwValue & 0xffff
 func HIWORD(dwValue DWORD) WORD = (dwValue >> 16) & 0xffff
@@ -267,11 +286,11 @@ define LTGRAY_BRUSH = 1
 define GRAY_BRUSH = 2
 define DKGRAY_BRUSH = 3
 define BLACK_BRUSH = 4
-define NULL_BRUSH = 5
-define HOLLOW_BRUSH = NULL_BRUSH
+define null_BRUSH = 5
+define HOLLOW_BRUSH = null_BRUSH
 define WHITE_PEN = 6
 define BLACK_PEN = 7
-define NULL_PEN = 8
+define null_PEN = 8
 define OEM_FIXED_FONT = 10
 define ANSI_FIXED_FONT = 11
 define ANSI_VAR_FONT = 12
@@ -365,6 +384,9 @@ define ES_NUMBER = 0x2000
 // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowtexta
 foreign GetWindowTextA(hWnd HWND, lpString LPSTR, nMaxCount int) int
 
+// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowtextlengtha
+foreign GetWindowTextLengthA(hWnd HWND) int
+
 // https://github.com/tpn/winsdk-10/blob/9b69fd26ac0c7d0b83d378dba01080e93349c2ed/Include/10.0.14393.0/um/commdlg.h#L104
 alias LPOFNHOOKPROC = stdcall func(HWND, UINT, WPARAM, LPARAM) UINT_PTR
 
@@ -424,3 +446,6 @@ define OFN_ENABLEINCLUDENOTIFY = 0x00400000 // send include message to callback
 define OFN_ENABLESIZING = 0x00800000
 define OFN_DONTADDTORECENT = 0x02000000
 define OFN_FORCESHOWHIDDEN = 0x10000000 // Show All files including System and hidden files
+
+// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setcursor
+foreign SetCursor(hCursor HCURSOR) HCURSOR
