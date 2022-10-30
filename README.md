@@ -21,20 +21,20 @@ No official win32 bindings exist yet, so all of the necessary Windows declaratio
 Projects:
 
 - all_use
- - How to create a basic text editor using everything showcased in this repo
+  - How to create a basic text editor using everything showcased in this repo
 - button
- - How to create buttons
+  - How to create buttons
 - edittext
- - How to make an edit control
+  - How to make an edit control
 - edittext_use
- - How to use the text from an edit control
+  - How to use the text from an edit control
 - opendialog
- - How to ask the user to select a file using an open file dialog
+  - How to ask the user to select a file using an open file dialog
 - opendialog_use
- - How to use an open file dialog alongside a transparent static text control to show which file was chosen
+  - How to use an open file dialog alongside a transparent static text control to show which file was chosen
 - text
- - How to create a transparent static text control
+  - How to create a transparent static text control
 - text_change
- - How to create a transparent static text control and later change its text
+  - How to create a transparent static text control and later change its text
 - window
- - How to create a basic window
+  - How to create a basic window
