@@ -2,6 +2,7 @@
 @echo off
 
 echo ^[WARNING^] Assuming `adept` command supports version `2.7`
+call :compile all_use
 call :compile button
 call :compile edittext
 call :compile edittext_use

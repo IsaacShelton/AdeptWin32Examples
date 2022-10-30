@@ -8,11 +8,14 @@ import random
 import Optional
 import "../windows.adept"
 
-define IDC_TEXT_RESULT_TEXT = 101
+define IDC_TEXT_FILENAME_TEXT = 101
 define IDC_BUTTON_OPENFILE = 102
+define IDC_BUTTON_SAVEFILE = 103
+define IDC_EDIT1 = 104
 
-g_szClassName LPCSTR = 'myWindowClass'
+g_szClassName LPCSTR = 'myBasicEditor'
 g_hwndText1 HWND
+g_filename String
 
 func setText(hwnd HWND, id int, new_text String){
     // Convert String to C-String
@@ -84,10 +87,28 @@ stdcall func WndProc(hwnd HWND, msg UINT, wParam WPARAM, lParam LPARAM) LRESULT 
                 // Open file selection dialog to request that user selects a filename
                 filename String = openDialog()
 
-                // If the user selected a file, we will change the static text we created to show what they selected
+                // If the user selected a file, we will change the static text we created to show what filename they selected.
+                // Then we will also change the text of our edit control to be the contents of the file.
                 if filename != "" {
-                    setText(hwnd, IDC_TEXT_RESULT_TEXT, filename)
+                    g_filename = filename.commit()
+
+                    setText(hwnd, IDC_TEXT_FILENAME_TEXT, filename)
+                    setText(hwnd, IDC_EDIT1, loadFileContents(filename))
                 }
+            case IDC_BUTTON_SAVEFILE
+                // Get edittext control
+                edittext HWND = GetDlgItem(hwnd, IDC_EDIT1)
+
+                // Allocate buffer for contents
+                buffer_size usize = GetWindowTextLengthA(edittext) + 1
+                buffer *ubyte = new ubyte * buffer_size
+                defer delete buffer
+
+                // Read contents from edittext
+                GetWindowTextA(edittext, buffer, buffer_size)
+
+                // Write to file
+                saveFileContents(g_filename, StringView(buffer))
             }
     }
 
@@ -124,7 +145,7 @@ external stdcall func WinMain(hInstance, _hPrevInstance HINSTANCE, _lpCmdLine LP
     hwnd = CreateWindowEx(
         WS_EX_CLIENTEDGE,
         g_szClassName,
-        'The title of my window',
+        'Basic Text Editor',
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, 640, 480,
         null, null, hInstance, null)
@@ -134,8 +155,18 @@ external stdcall func WinMain(hInstance, _hPrevInstance HINSTANCE, _lpCmdLine LP
         return 0
     }
     
-    g_hwndText1 = CreateWindowA('static', '<no file selected>', WS_VISIBLE | WS_CHILD, 10, 10, 500, 20, hwnd, IDC_TEXT_RESULT_TEXT as HMENU, hInstance, null)
+    g_hwndText1 = CreateWindowA('static', '<no file selected>', WS_VISIBLE | WS_CHILD, 10, 10, 500, 20, hwnd, IDC_TEXT_FILENAME_TEXT as HMENU, hInstance, null)
+
+    _hwndEdit1 HWND = CreateWindow(
+        'edit',
+        '',
+        WS_BORDER | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL,
+        0, 115, 617, 318,
+        hwnd, IDC_EDIT1 as HMENU, hInstance, null
+    );
+
     _hwndButton1 HWND = CreateWindowA('button', 'Open file', WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 40, 100, 50, hwnd, IDC_BUTTON_OPENFILE as HMENU, hInstance, null)
+    _hwndButton2 HWND = CreateWindowA('button', 'Save file', WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 120, 40, 100, 50, hwnd, IDC_BUTTON_SAVEFILE as HMENU, hInstance, null)
 
     ShowWindow(hwnd, nCmdShow)
     UpdateWindow(hwnd)
@@ -147,4 +178,62 @@ external stdcall func WinMain(hInstance, _hPrevInstance HINSTANCE, _lpCmdLine LP
     }
 
     return Msg.wParam
+}
+
+func loadFileContents(filename String) String {
+    filename_cstr *ubyte = filename.cstr()
+    defer delete filename_cstr
+
+    file *FILE = fopen(filename_cstr, 'r')
+
+    if file == null {
+        // Failed to open file
+        MessageBoxA(null, 'Failed to open file', 'Error', MB_ICONERROR | MB_OK)
+        return ""
+    }
+
+    defer fclose(file)
+
+    result String
+    buffer 256 ubyte = undef
+
+    while fgets(buffer at 0, sizeof(buffer), file) {
+        repeat static strlen(buffer at 0) {
+            if(buffer[idx] == '\n'ub){
+                result.append("\r\n")
+            } else {
+                result.append(buffer[idx])
+            }
+        }
+    }
+
+    return result.commit()
+}
+
+func saveFileContents(filename String, contents String) successful {
+    filename_cstr *ubyte = filename.cstr()
+    defer delete filename_cstr
+
+    file *FILE = fopen(filename_cstr, 'w')
+    
+    if file == null {
+        // Failed to save file
+        MessageBoxA(null, 'Failed to save file', 'Error', MB_ICONERROR | MB_OK)
+        return false
+    }
+
+    defer fclose(file)
+
+    // Write each character to file
+    each ubyte in contents {
+        // Ignore carriage returns
+        if it == '\r'ub {
+            continue
+        }
+
+        fputc(it, file)
+    }
+
+    MessageBoxA(null, 'File saved successfully', 'File saved', MB_ICONINFORMATION | MB_OK)
+    return true
 }
