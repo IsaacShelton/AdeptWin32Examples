@@ -4,8 +4,6 @@ pragma windows_only
 pragma windowed
 
 import basics
-import random
-import Optional
 import "../windows.adept"
 
 define IDC_TEXT_RESULT_TEXT = 101

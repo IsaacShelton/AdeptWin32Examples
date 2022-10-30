@@ -4,8 +4,6 @@ pragma windows_only
 pragma windowed
 
 import basics
-import random
-import Optional
 import "../windows.adept"
 
 define IDC_TEXT_FILENAME_TEXT = 101
@@ -116,8 +114,6 @@ stdcall func WndProc(hwnd HWND, msg UINT, wParam WPARAM, lParam LPARAM) LRESULT 
 }
 
 external stdcall func WinMain(hInstance, _hPrevInstance HINSTANCE, _lpCmdLine LPSTR, nCmdShow int) int {
-    randomize()
-
     wc WNDCLASSEX
     hwnd HWND
     Msg MSG
