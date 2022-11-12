@@ -36,6 +36,8 @@ alias LONG = int
 alias HRGN = HANDLE
 alias HGLOBAL = HANDLE
 alias SIZE_T = usize // ULONG_PTR
+alias HFONT = HANDLE
+alias HMODULE = HANDLE
 
 define NULL = null
 define WM_CREATE = 0x0001 // https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-create
@@ -44,6 +46,7 @@ define WM_DESTROY = 0x0002 // https://docs.microsoft.com/en-us/windows/win32/win
 define WM_COMMAND = 0x0111 // https://learn.microsoft.com/en-us/windows/win32/menurc/wm-command
 define WM_CTLCOLORSTATIC = 0x0138 // https://github.com/tpn/winsdk-10/blob/9b69fd26ac0c7d0b83d378dba01080e93349c2ed/Include/10.0.10240.0/um/WinUser.h#L2218
 define WM_SETCURSOR = 0x0020 // https://learn.microsoft.com/en-us/windows/win32/menurc/wm-setcursor
+define WM_SETFONT = 0x0030 // https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-setfont
 
 define IDI_APPLICATION = MAKEINTRESOURCEA(32512) // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-loadicona
 
@@ -279,6 +282,9 @@ foreign SetBkMode(hdc HDC, mode int) int
 // https://github.com/tpn/winsdk-7/blob/f8a2d5f306b400f355ed3713b93725e6b8f69f1c/v7.1A/Include/WinGDI.h#L3654
 foreign GetStockObject(i int) HGDIOBJ
 
+// https://github.com/tpn/winsdk-7/blob/f8a2d5f306b400f355ed3713b93725e6b8f69f1c/v7.1A/Include/WinGDI.h#L1665
+define DEFAULT_GUI_FONT = 17
+
 // https://github.com/tpn/winsdk-7/blob/f8a2d5f306b400f355ed3713b93725e6b8f69f1c/v7.1A/Include/WinGDI.h#L1645-L1662
 /* Stock Logical Objects */
 define WHITE_BRUSH = 0
@@ -449,3 +455,19 @@ define OFN_FORCESHOWHIDDEN = 0x10000000 // Show All files including System and h
 
 // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setcursor
 foreign SetCursor(hCursor HCURSOR) HCURSOR
+
+// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendmessagea
+foreign SendMessageA(hWnd HWND, Msg UINT, wParam WPARAM, lParam LPARAM) LRESULT
+func alias SendMessage => SendMessageA
+
+// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-loadimagea
+foreign LoadImageA(hInst HINSTANCE, name LPCSTR, type UINT, cx int, cy int, fuLoad UINT) HANDLE
+func alias LoadImage => LoadImageA
+define IMAGE_BITMAP = 0
+define IMAGE_CURSOR = 2
+define IMAGE_ICON = 1
+
+
+// https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getmodulehandlea
+foreign GetModuleHandleA(lpModuleName LPCSTR) HMODULE
+func alias GetModuleHandle => GetModuleHandleA

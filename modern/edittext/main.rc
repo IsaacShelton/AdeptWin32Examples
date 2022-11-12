@@ -1,0 +1,12 @@
+
+#ifndef _main_rc
+#define _main_rc
+
+#include <windows.h>
+
+#define IDI_MAINICON 1000
+
+IDI_MAINICON ICON "main.ico"
+IDR_RT_MANIFEST1 RT_MANIFEST "main.exe.manifest"
+
+#endif

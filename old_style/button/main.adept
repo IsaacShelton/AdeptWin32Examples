@@ -1,0 +1,88 @@
+
+pragma compiler_version '2.7'
+pragma windows_only
+pragma windowed
+
+import basics
+import "../../windows.adept"
+
+define IDC_BUTTON_HI = 101
+define IDC_BUTTON_THIS_IS_A_BUTTON = 102
+define IDC_BUTTON_PRESS_ME = 103
+
+// Step 4: the Window Procedure
+stdcall func WndProc(hwnd HWND, msg UINT, wParam WPARAM, lParam LPARAM) LRESULT {
+    switch msg {
+        case WM_CLOSE
+            DestroyWindow(hwnd)
+        case WM_DESTROY
+            PostQuitMessage(0)
+        case WM_COMMAND
+            switch LOWORD(wParam) {
+            case IDC_BUTTON_HI
+                MessageBoxA(hwnd, 'Hi!', 'Title', MB_OK | MB_ICONINFORMATION)
+            case IDC_BUTTON_THIS_IS_A_BUTTON
+                MessageBoxA(hwnd, 'That is indeed a button. And you pressed it. Good job.', 'Title', MB_OK | MB_ICONERROR)
+            case IDC_BUTTON_PRESS_ME
+                MessageBoxA(hwnd, 'You pressed me!', 'Title', MB_OK | MB_ICONEXCLAMATION)
+            }
+    }
+
+    return DefWindowProc(hwnd, msg, wParam, lParam)
+}
+
+g_szClassName LPCSTR = 'myWindowClass'
+
+external stdcall func WinMain(hInstance, _hPrevInstance HINSTANCE, _lpCmdLine LPSTR, nCmdShow int) int {
+    wc WNDCLASSEX
+    hwnd HWND
+    Msg MSG
+
+    // Step 1: Registering the Window Class
+    wc.cbSize        = sizeof WNDCLASSEX
+    wc.style         = 0
+    wc.lpfnWndProc   = func &WndProc
+    wc.cbClsExtra    = 0
+    wc.cbWndExtra    = 0
+    wc.hInstance     = hInstance
+    wc.hIcon         = LoadIcon(null, IDI_APPLICATION)
+    wc.hCursor       = LoadCursor(null, IDC_ARROW)
+    wc.hbrBackground = cast HBRUSH (COLOR_WINDOW + 1)
+    wc.lpszMenuName  = null
+    wc.lpszClassName = g_szClassName
+    wc.hIconSm       = LoadIcon(null, IDI_APPLICATION)
+
+    if !RegisterClassEx(&wc) {
+        MessageBox(null, 'Window Registration Failed!', 'Error!', MB_ICONEXCLAMATION | MB_OK)
+        return 0
+    }
+
+    // Step 2: Creating the Window
+    hwnd = CreateWindowEx(
+        WS_EX_CLIENTEDGE,
+        g_szClassName,
+        'The title of my window',
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT, 640, 480,
+        null, null, hInstance, null)
+
+    if hwnd == null {
+        MessageBox(null, 'Window Creation Failed!', 'Error!', MB_ICONEXCLAMATION | MB_OK)
+        return 0
+    }
+
+    _hwndButton1 HWND = CreateWindowA('button', 'Hi', WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 10, 100, 100, hwnd, IDC_BUTTON_HI as HMENU, hInstance, null)
+    _hwndButton2 HWND = CreateWindowA('button', 'This is a button', WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 200, 200, 200, 50, hwnd, IDC_BUTTON_THIS_IS_A_BUTTON as HMENU, hInstance, null)
+    _hwndButton3 HWND = CreateWindowA('button', 'Press me!', WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 250, 100, 250, 50, hwnd, IDC_BUTTON_PRESS_ME as HMENU, hInstance, null)
+
+    ShowWindow(hwnd, nCmdShow)
+    UpdateWindow(hwnd)
+
+    // Step 3: The Message Loop
+    while GetMessage(&Msg, null, 0, 0) > 0 {
+        TranslateMessage(&Msg)
+        DispatchMessage(&Msg)
+    }
+
+    return Msg.wParam
+}

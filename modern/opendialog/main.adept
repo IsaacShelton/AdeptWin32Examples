@@ -1,0 +1,39 @@
+
+pragma compiler_version '2.8'
+pragma windows_only
+pragma windowed
+pragma windres "main.rc"
+
+import basics
+import "../../windows.adept"
+
+external stdcall func WinMain(_hInstance, _hPrevInstance HINSTANCE, _lpCmdLine LPSTR, _nCmdShow int) int {
+    szFile 260 ubyte
+
+    // Since we are storing \0 characters in filter, we will need either String or ubyte buffer
+    // (regular c-string literals in Adept 2.7 do not preserve anything after first \0)
+    filter String = "All Files\0*.*\0Text Files\0*.txt\0\0"
+
+    ofn OPENFILENAMEA
+    ofn.lStructSize = sizeof(ofn)
+    ofn.hwndOwner = null
+    ofn.lpstrFile = szFile at 0
+    ofn.nMaxFile = sizeof(szFile)
+    ofn.lpstrFilter = filter.array // access raw buffer of string
+    ofn.nFilterIndex = 1
+    ofn.lpstrFileTitle = null
+    ofn.nMaxFileTitle = 0
+    ofn.lpstrInitialDir = null
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST
+
+    if GetOpenFileNameA(&ofn) {
+        filename *ubyte = ofn.lpstrFile
+
+        message *ubyte = ("Got filename: " + StringView(filename)).cstr()
+        defer delete message
+
+        MessageBoxA(null, message, 'Yay', MB_ICONINFORMATION | MB_OK)
+    }
+
+    return 0
+}

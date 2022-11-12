@@ -1,0 +1,146 @@
+
+pragma compiler_version '2.7'
+pragma windows_only
+pragma windowed
+
+import basics
+import "../../windows.adept"
+
+define IDC_TEXT_RESULT_TEXT = 101
+define IDC_BUTTON_OPENFILE = 102
+
+g_szClassName LPCSTR = 'myWindowClass'
+g_hwndText1 HWND
+
+func setText(hwnd HWND, id int, new_text String){
+    // Convert String to C-String
+    new_text_cstr *ubyte = new_text.cstr()
+    defer delete new_text_cstr
+
+    // Set text of static text control
+    SetDlgItemText(hwnd, id, new_text_cstr)
+
+    // Get handle to static text control
+    hctrl HWND = GetDlgItem(hwnd, id)
+
+    // Get area that the static control occupies
+    rect RECT
+    GetClientRect(hctrl, &rect)
+
+    // Map area that static control occupies to main window coordinates
+    MapWindowPoints(hctrl, hwnd, &rect as *POINT, 2)
+
+    // Invalidate the area (will cause redraw for that area)
+    InvalidateRect(hwnd, &rect, true)
+}
+
+func openDialog String {
+    // Buffer to hold input filename
+    szFile 260 ubyte
+
+    // Since we are storing \0 characters in filter, we will need either String or ubyte buffer
+    // (regular c-string literals in Adept 2.7 do not preserve anything after first \0)
+    filter String = "All Files\0*.*\0Text Files\0*.txt\0\0"
+
+    // Configure open file dialog
+    ofn OPENFILENAMEA
+    ofn.lStructSize = sizeof(ofn)
+    ofn.hwndOwner = null
+    ofn.lpstrFile = szFile at 0
+    ofn.nMaxFile = sizeof(szFile)
+    ofn.lpstrFilter = filter.array // access raw buffer of string
+    ofn.nFilterIndex = 1
+    ofn.lpstrFileTitle = null
+    ofn.nMaxFileTitle = 0
+    ofn.lpstrInitialDir = null
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST
+
+    // Show dialog
+    if GetOpenFileNameA(&ofn) {
+        // Return filename selected if success
+        return String(ofn.lpstrFile)
+    }
+
+    // Return nothing if cancelled or an error occurred
+    return ""
+}
+
+// Step 4: the Window Procedure
+stdcall func WndProc(hwnd HWND, msg UINT, wParam WPARAM, lParam LPARAM) LRESULT {
+    switch msg {
+        case WM_CLOSE
+            DestroyWindow(hwnd)
+        case WM_DESTROY
+            PostQuitMessage(0)
+        case WM_CTLCOLORSTATIC
+            // Set background for static texts to be transparent
+            SetBkMode(wParam as HDC, TRANSPARENT)
+            return GetStockObject(HOLLOW_BRUSH) as LRESULT
+        case WM_COMMAND
+            switch LOWORD(wParam) {
+            case IDC_BUTTON_OPENFILE
+                // Open file selection dialog to request that user selects a filename
+                filename String = openDialog()
+
+                // If the user selected a file, we will change the static text we created to show what they selected
+                if filename != "" {
+                    setText(hwnd, IDC_TEXT_RESULT_TEXT, filename)
+                }
+            }
+    }
+
+    return DefWindowProc(hwnd, msg, wParam, lParam)
+}
+
+external stdcall func WinMain(hInstance, _hPrevInstance HINSTANCE, _lpCmdLine LPSTR, nCmdShow int) int {
+    wc WNDCLASSEX
+    hwnd HWND
+    Msg MSG
+
+    // Step 1: Registering the Window Class
+    wc.cbSize        = sizeof WNDCLASSEX
+    wc.style         = 0
+    wc.lpfnWndProc   = func &WndProc
+    wc.cbClsExtra    = 0
+    wc.cbWndExtra    = 0
+    wc.hInstance     = hInstance
+    wc.hIcon         = LoadIcon(null, IDI_APPLICATION)
+    wc.hCursor       = LoadCursor(null, IDC_ARROW)
+    wc.hbrBackground = cast HBRUSH (COLOR_WINDOW + 1)
+    wc.lpszMenuName  = null
+    wc.lpszClassName = g_szClassName
+    wc.hIconSm       = LoadIcon(null, IDI_APPLICATION)
+
+    if !RegisterClassEx(&wc) {
+        MessageBox(null, 'Window Registration Failed!', 'Error!', MB_ICONEXCLAMATION | MB_OK)
+        return 0
+    }
+
+    // Step 2: Creating the Window
+    hwnd = CreateWindowEx(
+        WS_EX_CLIENTEDGE,
+        g_szClassName,
+        'The title of my window',
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT, 640, 480,
+        null, null, hInstance, null)
+
+    if hwnd == null {
+        MessageBox(null, 'Window Creation Failed!', 'Error!', MB_ICONEXCLAMATION | MB_OK)
+        return 0
+    }
+    
+    g_hwndText1 = CreateWindowA('static', '<no file selected>', WS_VISIBLE | WS_CHILD, 10, 10, 500, 20, hwnd, IDC_TEXT_RESULT_TEXT as HMENU, hInstance, null)
+    _hwndButton1 HWND = CreateWindowA('button', 'Open file', WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 40, 100, 50, hwnd, IDC_BUTTON_OPENFILE as HMENU, hInstance, null)
+
+    ShowWindow(hwnd, nCmdShow)
+    UpdateWindow(hwnd)
+
+    // Step 3: The Message Loop
+    while GetMessage(&Msg, null, 0, 0) > 0 {
+        TranslateMessage(&Msg)
+        DispatchMessage(&Msg)
+    }
+
+    return Msg.wParam
+}
