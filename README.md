@@ -61,7 +61,17 @@ Projects:
   - window
       - How to create a basic window
 
-### Attributions
+# Screenshots
+### modern/all_use/main.adept
+![](https://github.com/IsaacShelton/AdeptWin32Examples/raw/master/.github/1.png)
+### modern/button/main.adept
+![](https://github.com/IsaacShelton/AdeptWin32Examples/raw/master/.github/2.png)
+### modern/opendialog_use/main.adept
+![](https://github.com/IsaacShelton/AdeptWin32Examples/raw/master/.github/3.png)
+### modern/text_change/main.adept
+![](https://github.com/IsaacShelton/AdeptWin32Examples/raw/master/.github/4.png)
+
+##### Asset Attributions
 [`all_use` app icon created by juicy_fish - Flaticon](https://www.flaticon.com/free-icons/text)
 
 [`button` app icon created by Freepik - Flaticon](https://www.flaticon.com/free-icons/finger)
