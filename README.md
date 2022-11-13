@@ -18,6 +18,8 @@ This repo contains several small example Win32 applications written in Adept.
 
 No official win32 bindings exist yet, so all of the necessary Windows declarations are inside `windows.adept` and all required native libraries are in the `__libs__` directory.
 
+For heavily commented code, see `modern/all_use`. It covers everything used in this repo. All other files only have occasional comments, as they assume you already know how to use the Win32 API.
+
 Projects:
 
 - modern - ***Win32 GUI with Modern Styling***

@@ -2,11 +2,16 @@
 #ifndef _main_rc
 #define _main_rc
 
+// We can optionally include windows.h in our resource file
 #include <windows.h>
 
+// Define resource ID for our main icon (this must be the same value as what we said in main.adept)
 #define IDI_MAINICON 1000
 
+// Tell Windows about our icon
 IDI_MAINICON ICON "main.ico"
+
+// Tell Windows about our manifest file
 IDR_RT_MANIFEST1 RT_MANIFEST "main.exe.manifest"
 
 #endif
