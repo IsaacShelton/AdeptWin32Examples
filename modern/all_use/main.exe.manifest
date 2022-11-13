@@ -1,17 +1,3 @@
-<!--
-
-    This is the manifest file for our application.
-
-    It does two main things:
-
-    - Enables modern styling by telling Windows to use Common Controls 6
-    - Enables UTF-8 for win32 FunctionA() routines
-
-    Our resource file will mention this manifest, which is
-    how Windows will know about it
-
--->
-
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" manifestVersion="1.0">
     <assemblyIdentity name="Example.Modern.AllUse.Main" type="win32" version="0.0.0.0"/>

@@ -1,0 +1,9 @@
+main.exe.manifest is the manifest file for our application.
+
+It does two main things:
+
+- Enables modern styling by telling Windows to use Common Controls 6
+- Enables UTF-8 for win32 FunctionA() routines
+
+Our resource file (`main.rc`) will mention the manifest, which is
+how Windows will know about it
